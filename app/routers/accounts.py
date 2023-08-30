@@ -31,10 +31,15 @@ def create_account(account: schemas.AccountCreateIn, db: Session = Depends(get_d
     except Exception as e:
         if "accounts_email_key" in str(e):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
+        
         if "accounts_username_key" in str(e):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+        
         if str(e) == "Username must be 3 characters or longer.":
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username must be 3 characters or longer.")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"{str(e)}")
+        
+        if str(e) == "Username can only contain letters and numbers.":
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"{str(e)}")
 
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username or email already exists")
     

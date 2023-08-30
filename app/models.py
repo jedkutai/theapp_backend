@@ -1,3 +1,4 @@
+import re
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, CheckConstraint
 from sqlalchemy.orm import validates
 # from sqlalchemy.orm import relationship
@@ -23,10 +24,17 @@ class Account(Base):
     validated = Column(Boolean, nullable=False, default=False)
     
     # Adding a check constraint to enforce minimum username length
-    __table_args__ = (CheckConstraint("length(username) >= 3", name="min_username_length"),)
+    __table_args__ = (
+        CheckConstraint("length(username) >= 3", name="min_username_length"),
+        CheckConstraint("username ~ '^[a-zA-Z0-9]*$'", name="alphanumeric_username"),
+        )
     
     @validates("username")
     def validate_username(self, key, username):
         if len(username) < 3:
             raise ValueError("Username must be 3 characters or longer.")
+        
+        if not re.match("^[a-zA-Z0-9]*$", username):
+            raise ValueError("Username can only contain letters and numbers.")
+        
         return username
