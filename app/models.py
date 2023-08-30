@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, CheckConstraint
+from sqlalchemy.orm import validates
 # from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -21,3 +22,11 @@ class Account(Base):
 
     validated = Column(Boolean, nullable=False, default=False)
     
+    # Adding a check constraint to enforce minimum username length
+    __table_args__ = (CheckConstraint("length(username) >= 3", name="min_username_length"),)
+    
+    @validates("username")
+    def validate_username(self, key, username):
+        if len(username) < 3:
+            raise ValueError("Username must be 3 characters or longer.")
+        return username
