@@ -26,6 +26,7 @@ class Account(Base):
     # Adding a check constraint to enforce minimum username length
     __table_args__ = (
         CheckConstraint("length(username) >= 3", name="min_username_length"),
+        CheckConstraint("length(username) <= 16", name="max_username_length"),
         CheckConstraint("username ~ '^[a-zA-Z0-9]*$'", name="alphanumeric_username"),
         )
     
@@ -33,6 +34,9 @@ class Account(Base):
     def validate_username(self, key, username):
         if len(username) < 3:
             raise ValueError("Username must be 3 characters or longer.")
+        
+        if len(username) > 16:
+            raise ValueError("Username cannot be longer than 16 characters.")
         
         if not re.match("^[a-zA-Z0-9]*$", username):
             raise ValueError("Username can only contain letters and numbers.")

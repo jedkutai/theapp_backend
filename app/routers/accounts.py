@@ -38,6 +38,9 @@ def create_account(account: schemas.AccountCreateIn, db: Session = Depends(get_d
         if str(e) == "Username must be 3 characters or longer.":
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"{str(e)}")
         
+        if str(e) == "Username cannot be longer than 16 characters.":
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"{str(e)}")
+        
         if str(e) == "Username can only contain letters and numbers.":
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"{str(e)}")
 
