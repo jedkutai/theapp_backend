@@ -13,8 +13,31 @@ router = APIRouter(
 def root():
     return {"message": "User Portal"}
 
-
-
+@router.post("/checkaccount", status_code=status.HTTP_202_ACCEPTED, response_model=schemas.AccountCreateOut)
+def create_account(account: schemas.AccountCreateIn, db: Session = Depends(get_db)):
+    
+    try:
+        new_account = models.Account(**account.model_dump())
+        
+        search_username = db.query(models.Account).filter(models.Account.username == new_account.username).first()
+        search_email = db.query(models.Account).filter(models.Account.email == new_account.email).first()
+        
+        if not search_username and not search_email:
+            return new_account
+        
+        else:
+            raise ValueError("Username or email already exists")
+    
+    except Exception:
+        if search_username and not search_email:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+        
+        elif not search_username and search_email:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
+        else:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username and email already exist")
+    
+    
 
 
 @router.post("/createaccount", status_code=status.HTTP_201_CREATED, response_model=schemas.AccountCreateOut)
