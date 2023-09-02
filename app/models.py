@@ -1,7 +1,7 @@
 import re
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, CheckConstraint
 from sqlalchemy.orm import validates
-# from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 
@@ -21,6 +21,7 @@ class Account(Base):
     bio = Column(String, nullable=True)
     profile_pic = Column(String, nullable=True)
 
+    public_account = Column(Boolean, nullable=True, default=True)
     validated = Column(Boolean, nullable=False, default=False)
     
     # Adding a check constraint to enforce minimum username length
@@ -42,3 +43,20 @@ class Account(Base):
             raise ValueError("Username can only contain letters and numbers.")
         
         return username
+
+
+class Post(Base):
+    __tablename__ = "posts"
+
+    post_id = Column(Integer, primary_key=True, nullable=False)
+    caption = Column(String, nullable=True)
+    image = Column(String, nullable=False)
+    game = Column(String, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True),  nullable=False, server_default=text("now()"))
+
+    account_id = Column(Integer, ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False)
+    owner = relationship("Account")
+
+    __table_args__ = (
+        CheckConstraint("length(caption) <= 2200", name="max_caption_length"),
+        )
